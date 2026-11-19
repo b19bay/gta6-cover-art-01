@@ -11,13 +11,49 @@
 // Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
 //   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 
-import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-app.ts';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
 const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+
+// Pre-submit gate validation (authored): refuse to build an entry the scorer would refuse, before any copy.
+// Caps mirror the scorer's reference/gate.json and the buildDossier call below.
+const gateErrors = [];
+const appDir = join(here, 'app');
+const shotsDir = join(here, 'screenshots');
+if (!existsSync(join(appDir, 'index.html'))) gateErrors.push('app/index.html is missing');
+let appEntries = 0;
+let appBytes = 0;
+const walkApp = (dir) => {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    appEntries += 1;
+    const p = join(dir, entry.name);
+    if (entry.isDirectory()) walkApp(p);
+    else if (entry.isFile()) appBytes += statSync(p).size;
+  }
+};
+if (existsSync(appDir)) walkApp(appDir);
+else gateErrors.push('app/ is missing');
+if (appEntries > 993) gateErrors.push(`app/ holds ${appEntries} files+dirs, over the 993 cap`);
+if (appBytes > 50331648) gateErrors.push(`app/ totals ${appBytes} bytes, over the 48 MiB cap`);
+let shotCount = 0;
+if (existsSync(shotsDir)) {
+  for (const entry of readdirSync(shotsDir, { withFileTypes: true })) {
+    if (!entry.isFile()) continue;
+    shotCount += 1;
+    const size = statSync(join(shotsDir, entry.name)).size;
+    if (size > 262144) gateErrors.push(`screenshots/${entry.name} is ${size} bytes, over the 256 KiB cap`);
+  }
+}
+if (shotCount < 3 || shotCount > 4) gateErrors.push(`screenshots/ holds ${shotCount} files, need 3-4`);
+if (gateErrors.length > 0) {
+  console.error('GATE FAILED: refusing to build an invalid entry:');
+  for (const e of gateErrors) console.error(`  - ${e}`);
+  process.exit(1);
+}
 
 mkdirSync(out, { recursive: true });
 cpSync(join(here, 'app'), join(out, 'app'), { recursive: true });
