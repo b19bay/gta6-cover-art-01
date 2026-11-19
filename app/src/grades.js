@@ -1,72 +1,117 @@
-// The four colour grades. A grade is sky gradient stops (drawn over the
-// photo with an overlay blend), a deep bottom tint, the caption accent and
-// whether the hero panel gets a sun disc. No Rockstar artwork is involved:
-// these are original colour treatments.
-export const GRADES = {
-  sunset: {
-    label: 'Sunset',
-    sky: ['#ff9a3d', '#ff5e62', '#c22e7a'],
-    deep: 'rgba(90, 10, 70, 0.42)',
-    accent: '#ffd166',
-    sun: true,
-  },
-  neon: {
-    label: 'Neon Nights',
-    sky: ['#00ffe7', '#7b2ff7', '#ff2fb3'],
-    deep: 'rgba(8, 8, 44, 0.45)',
-    accent: '#00ffe7',
-    sun: false,
-  },
-  noir: {
-    label: 'Noir',
-    sky: ['#8a8a8a', '#3a3a3a', '#0d0d0d'],
-    deep: 'rgba(0, 0, 0, 0.5)',
-    accent: '#f2f2f2',
-    sun: false,
-  },
-  gold: {
-    label: 'Gold Hour',
-    sky: ['#ffe08a', '#ff9a3d', '#b3541e'],
-    deep: 'rgba(90, 40, 5, 0.4)',
-    accent: '#fff3c4',
-    sun: true,
-  },
-};
+// Colour grades for the cover composer.
+// A grade is a per-pixel colour transform plus an optional light overlay
+// drawn over the panel after the photo. All four are original looks built
+// for this app: a Vice City sunset, a neon night, a high-contrast noir and
+// a warm golden hour. Nothing here samples another game's palette.
 
-export const GRADE_NAMES = Object.keys(GRADES);
-
-/** Paints a grade over rectangle (x, y, w, h) of the context. */
-export function applyGrade(ctx, grade, x, y, w, h) {
-  const g = ctx.createLinearGradient(x, y, x, y + h);
-  grade.sky.forEach((c, i) => g.addColorStop(i / (grade.sky.length - 1), c));
-  ctx.save();
-  ctx.globalAlpha = 0.22;
-  ctx.globalCompositeOperation = 'overlay';
-  ctx.fillStyle = g;
-  ctx.fillRect(x, y, w, h);
-  ctx.restore();
-  const v = ctx.createLinearGradient(x, y + h * 0.5, x, y + h);
-  v.addColorStop(0, 'rgba(0, 0, 0, 0)');
-  v.addColorStop(1, grade.deep);
-  ctx.fillStyle = v;
-  ctx.fillRect(x, y, w, h);
+function clampByte(value) {
+  return value < 0 ? 0 : value > 255 ? 255 : value;
 }
 
-/** Draws the grade's sun disc inside the hero panel rectangle. */
-export function drawSun(ctx, grade, x, y, w, h) {
-  if (!grade.sun) return;
-  const r = Math.min(w, h) * 0.13;
-  const cx = x + w * 0.8;
-  const cy = y + h * 0.22;
-  const g = ctx.createRadialGradient(cx, cy, r * 0.1, cx, cy, r);
-  g.addColorStop(0, 'rgba(255, 246, 200, 0.98)');
-  g.addColorStop(0.55, 'rgba(255, 190, 90, 0.9)');
-  g.addColorStop(1, 'rgba(255, 120, 60, 0)');
-  ctx.save();
-  ctx.globalCompositeOperation = 'screen';
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
+function applyCurve(value, lift, gain) {
+  return clampByte((value / 255) * gain * 255 + lift);
 }
+
+// Warm the photo: lift the reds, hold the greens, pull the blues down, and
+// push the saturation up a touch so sunsets burn.
+export function gradeSunsetPixel(r, g, b) {
+  const warmR = clampByte(r * 1.14 + 12);
+  const warmG = clampByte(g * 1.03 + 4);
+  const warmB = clampByte(b * 0.86);
+  const mean = (warmR + warmG + warmB) / 3;
+  return [
+    clampByte(mean + (warmR - mean) * 1.12),
+    clampByte(mean + (warmG - mean) * 1.12),
+    clampByte(mean + (warmB - mean) * 1.12),
+  ];
+}
+
+// Neon night: shadows go magenta-blue, highlights go cyan, saturation up.
+// The look of a boulevard after dark, lit by signs.
+export function gradeNeonPixel(r, g, b) {
+  const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+  const t = lum / 255;
+  const shadowTint = 1 - t;
+  let nr = r * 1.05 + shadowTint * 26;
+  let ng = g * 0.98 + t * 10;
+  let nb = b * 1.12 + shadowTint * 34;
+  const mean = (nr + ng + nb) / 3;
+  nr = mean + (nr - mean) * 1.28;
+  ng = mean + (ng - mean) * 1.28;
+  nb = mean + (nb - mean) * 1.28;
+  return [clampByte(nr), clampByte(ng), clampByte(nb)];
+}
+
+// Palm noir: pull most of the colour out, raise the contrast, cool shadows.
+// A stark black-and-white-with-teeth poster.
+export function gradeNoirPixel(r, g, b) {
+  const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+  const grey = clampByte(((lum - 128) * 1.28) + 128);
+  const t = lum / 255;
+  return [
+    clampByte(grey + (1 - t) * 6),
+    clampByte(grey + (1 - t) * 12),
+    clampByte(grey + (1 - t) * 16),
+  ];
+}
+
+// Golden hour: honey light, gentle contrast, warm highlights.
+export function gradeGoldenPixel(r, g, b) {
+  const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+  const t = lum / 255;
+  let nr = r * 1.10 + t * 14;
+  let ng = g * 1.02 + t * 6;
+  let nb = b * 0.90;
+  const mean = (nr + ng + nb) / 3;
+  nr = mean + (nr - mean) * 1.14;
+  ng = mean + (ng - mean) * 1.14;
+  nb = mean + (nb - mean) * 1.14;
+  return [clampByte(nr), clampByte(ng), clampByte(nb)];
+}
+
+export const GRADES = [
+  {
+    id: 'sunset',
+    name: 'Vice Sunset',
+    pixel: gradeSunsetPixel,
+    overlay: { from: [255, 94, 20, 0.16], to: [255, 45, 120, 0.10], vertical: true },
+    captionGradient: [[255, 255, 255], [255, 211, 25]],
+  },
+  {
+    id: 'neon',
+    name: 'Neon Nights',
+    pixel: gradeNeonPixel,
+    overlay: { from: [0, 229, 255, 0.10], to: [255, 0, 153, 0.14], vertical: false },
+    captionGradient: [[255, 255, 255], [0, 229, 255]],
+  },
+  {
+    id: 'noir',
+    name: 'Palm Noir',
+    pixel: gradeNoirPixel,
+    overlay: null,
+    captionGradient: [[255, 255, 255], [214, 214, 214]],
+  },
+  {
+    id: 'golden',
+    name: 'Golden Hour',
+    pixel: gradeGoldenPixel,
+    overlay: { from: [255, 183, 20, 0.14], to: [255, 120, 0, 0.08], vertical: true },
+    captionGradient: [[255, 244, 200], [255, 183, 20]],
+  },
+];
+
+export function getGrade(id) {
+  return GRADES.find((entry) => entry.id === id) || GRADES[0];
+}
+
+// Apply one grade's pixel transform to a whole RGBA buffer, in place.
+export function applyGradeToPixels(data, pixelFn) {
+  for (let i = 0; i < data.length; i += 4) {
+    const [r, g, b] = pixelFn(data[i], data[i + 1], data[i + 2]);
+    data[i] = r;
+    data[i + 1] = g;
+    data[i + 2] = b;
+  }
+}
+
+export { applyCurve, clampByte };

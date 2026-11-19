@@ -1,59 +1,114 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cover Heist — GTA-style cover maker</title>
-<link rel="stylesheet" href="./style.css">
+<title>Cover Heist — GTA-style cover art maker</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<main class="app">
-  <section class="controls">
+<div id="app">
+  <header class="topbar">
     <h1>Cover Heist</h1>
-    <p class="tag">Your photo + a caption, made into GTA-style cover art. Three steps, offline.</p>
+    <p class="tagline">Turn your photo into poster cover art. Pick a layout, pick a grade, write the title, export the PNG.</p>
+  </header>
 
-    <h2>1 · Photo</h2>
-    <label>Photo A (hero panel) <input id="photo-a" type="file" accept="image/*"></label>
-    <label>Photo B (other panels) <input id="photo-b" type="file" accept="image/*"></label>
-    <div class="row">
-      <button id="sample-a" type="button">Try sample A</button>
-      <button id="sample-b" type="button">Try sample B</button>
-    </div>
+  <main class="workspace">
+    <section class="preview-column" aria-label="Live preview">
+      <canvas id="preview" width="880" height="880"></canvas>
+      <p id="status" class="status" role="status">Add a photo to begin — or try a sample.</p>
+      <p class="hint">Click a panel to select it. Drag to move its photo. Scroll to zoom. Drop image files right onto the preview.</p>
+    </section>
 
-    <h2>2 · Layout</h2>
-    <div class="row" role="group" aria-label="Layout">
-      <button type="button" data-layout="hero-strip">Hero + Strip</button>
-      <button type="button" data-layout="grid">Grid 2×2</button>
-      <button type="button" data-layout="diagonal">Diagonal</button>
-      <button type="button" data-layout="triptych">Triptych</button>
-    </div>
+    <aside class="controls" aria-label="Editor controls">
+      <section class="control-group">
+        <h2>1 · Photos</h2>
+        <input type="file" id="photo-input" accept="image/*" multiple hidden>
+        <button type="button" id="add-photos" class="primary">Add your photos…</button>
+        <div id="photo-tray" class="photo-tray"></div>
+        <p class="hint">Click a photo to put it in the selected panel. Shift-click to fill every panel with it. Photos stay on your machine.</p>
+        <div class="sample-row">
+          <span>Samples:</span>
+          <button type="button" data-sample="pier">Pier</button>
+          <button type="button" data-sample="boulevard">Boulevard</button>
+        </div>
+      </section>
 
-    <h2>3 · Grade</h2>
-    <div class="row" role="group" aria-label="Grade">
-      <button type="button" data-grade="sunset">Sunset</button>
-      <button type="button" data-grade="neon">Neon Nights</button>
-      <button type="button" data-grade="noir">Noir</button>
-      <button type="button" data-grade="gold">Gold Hour</button>
-    </div>
+      <section class="control-group">
+        <h2>2 · Panels</h2>
+        <div class="button-row" role="group" aria-label="Panel layout">
+          <button type="button" data-layout="hero-strip">Hero + Strip</button>
+          <button type="button" data-layout="grid">Four Grid</button>
+          <button type="button" data-layout="diagonal">Diagonal Split</button>
+          <button type="button" data-layout="triptych">Triptych</button>
+        </div>
+        <div id="panel-list" class="panel-list"></div>
+      </section>
 
-    <h2>4 · Caption</h2>
-    <label>Caption <input id="caption" type="text" maxlength="40" value="Sunset Heist"></label>
-    <div class="row" role="group" aria-label="Caption position">
-      <button type="button" data-position="bottom">Caption at bottom</button>
-      <button type="button" data-position="top">Caption at top</button>
-    </div>
-    <p class="hint">Drag the photo on the preview to reposition it, scroll to zoom, click a panel to select it.</p>
+      <section class="control-group">
+        <h2>3 · Colour grade</h2>
+        <div class="button-row" role="group" aria-label="Colour grade">
+          <button type="button" data-grade="sunset">Vice Sunset</button>
+          <button type="button" data-grade="neon">Neon Nights</button>
+          <button type="button" data-grade="noir">Palm Noir</button>
+          <button type="button" data-grade="golden">Golden Hour</button>
+        </div>
+      </section>
 
-    <h2>5 · Export PNG</h2>
-    <div class="row">
-      <button type="button" data-export="0">1080 × 1080</button>
-      <button type="button" data-export="1">1080 × 1350</button>
-      <button type="button" data-export="2">1920 × 1080</button>
-    </div>
-    <p id="status" role="status"></p>
-  </section>
-  <canvas id="stage" width="720" height="720" aria-label="Cover preview"></canvas>
-</main>
-<script type="module" src="./src/main.js"></script>
+      <section class="control-group">
+        <h2>4 · Caption</h2>
+        <label class="field">
+          <span>Title</span>
+          <input type="text" id="caption-text" value="SUNSET HEIST" maxlength="40" autocomplete="off">
+        </label>
+        <label class="field">
+          <span>Title size</span>
+          <input type="range" id="caption-size" min="8" max="26" step="1" value="16">
+        </label>
+        <label class="field">
+          <span>Title position</span>
+          <select id="caption-placement">
+            <option value="bottom" selected>Bottom</option>
+            <option value="center">Centre</option>
+            <option value="top">Top</option>
+          </select>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="caption-outline" checked> Bold outline
+        </label>
+        <label class="check">
+          <input type="checkbox" id="caption-shadow" checked> Drop shadow
+        </label>
+        <label class="field">
+          <span>Tagline (optional)</span>
+          <input type="text" id="tagline-text" maxlength="60" placeholder="e.g. LEONIDA, 2026" autocomplete="off">
+        </label>
+      </section>
+
+      <section class="control-group">
+        <h2>5 · Export PNG</h2>
+        <label class="field">
+          <span>Canvas size</span>
+          <select id="canvas-size">
+            <option value="square" selected>Square 1080 × 1080</option>
+            <option value="portrait">Portrait 1080 × 1350</option>
+            <option value="wide">Wide 1920 × 1080</option>
+          </select>
+        </label>
+        <div class="button-row export-row" role="group" aria-label="Export size">
+          <button type="button" data-export="square">Square PNG</button>
+          <button type="button" data-export="portrait">Portrait PNG</button>
+          <button type="button" data-export="wide">Wide PNG</button>
+        </div>
+        <p class="hint">Export renders the full-size PNG from the same core as the preview — what you see is what you get.</p>
+      </section>
+    </aside>
+  </main>
+
+  <footer class="footnote">
+    <p>Cover Heist is an original design. It uses no Rockstar Games logo, artwork, character or font. The title font is Anton (SIL Open Font License), bundled under app/fonts. Sample photos were made for this bounty and are free to use. Your photos never leave your machine.</p>
+  </footer>
+</div>
+<script type="module" src="src/main.js"></script>
 </body>
 </html>

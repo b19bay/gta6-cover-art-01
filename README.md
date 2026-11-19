@@ -2,74 +2,45 @@
 [![rank](https://make.fun/badge/gta6-cover-art-01/b19bay/gta6-cover-art-01/rank.svg)](https://make.fun/bounty/gta6-cover-art-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01)
 [![reward](https://make.fun/badge/gta6-cover-art-01/b19bay/gta6-cover-art-01/reward.svg)](https://make.fun/bounty/gta6-cover-art-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01)
 
-# gta6-cover-art-01 — Cover Heist
+# Cover Heist — GTA-style cover art maker
 
-Turn your own photo and a caption into GTA 6-style cover art: multi-panel
-poster layouts, a bold condensed caption, a Vice City-style sunset or neon
-grade, exported as a PNG in the three post sizes (1080x1080, 1080x1350,
-1920x1080). Static files, no build step, no network request: open
-`app/index.html` from any static server and it works offline.
+Turn your photo into multi-panel poster cover art: pick a layout, pick a colour grade, write the title, export the PNG. Runs entirely offline from static files — your photos never leave your machine.
 
-## How it works (3 steps)
+## What it does
 
-1. **Drop a photo in** (or try a bundled sample). One photo can fill every
-   panel, or load a second photo for the smaller panels. Drag on the preview
-   to reposition a panel's photo, scroll to zoom it.
-2. **Pick a layout and a grade.** Four layouts (Hero + Strip, Grid 2x2,
-   Diagonal Split, Triptych) and four grades (Sunset, Neon Nights, Noir,
-   Gold Hour). Type the caption, choose top or bottom placement.
-3. **Export.** One click per size: 1080x1080 (square post), 1080x1350
-   (portrait post), 1920x1080 (landscape). The PNG downloads straight from
-   the canvas.
+- **Any photo**: add your own photos (file picker or drag-and-drop onto the preview), or try the two bundled samples. Click a panel to select it, click a photo to place it there, Shift-click to fill every panel with it. One photo can fill all panels with a different crop in each, or each panel can hold its own photo.
+- **Crop and position each panel**: drag a photo inside its panel to move it, scroll to zoom (1×–3×), or use the per-panel zoom slider.
+- **4 panel layouts**: Hero + Strip, Four Grid, Diagonal Split, Triptych.
+- **4 colour grades**: Vice Sunset, Neon Nights, Palm Noir, Golden Hour — per-pixel colour transforms plus a light overlay, with a painted sun on the hero panel for the sunset grades.
+- **Caption editor**: title text, size, position (bottom / centre / top), bold outline, drop shadow, optional tagline. The lettering is Anton (SIL Open Font License, bundled under `app/fonts/`) with a gradient fill.
+- **3 export sizes**: Square 1080 × 1080, Portrait 1080 × 1350, Wide 1920 × 1080 — real PNGs rendered at full size from the same core as the live preview.
+- **Live preview**: every change re-renders the cover at once. What you see is what the PNG will be.
 
-## Architecture: canvas-first
+## How it is built (canvas-first)
 
-One pure render core draws everything, with no DOM dependency in the core
-itself, so the editor and the cover share the exact same drawing code:
+One pure-JS render core with no DOM dependency — `app/src/render-core.js` (`renderCover(surface, state)`) — draws the whole cover through a small surface interface. The browser hands it a canvas surface (`app/src/canvas-surface.js`); the screenshot renderer hands it a pixel surface. Layouts (`layouts.js`), grades (`grades.js`), caption lettering (`caption.js`) and crop math (`photos.js`) are separate modules with one job each. The editor (`editor.js`, `main.js`) is DOM controls around the preview canvas, and the exporter (`exporter.js`) renders the same core at full size into an offscreen canvas and downloads the PNG.
 
-- `app/src/render-core.js` — `renderCover(ctx, state, w, h)`: panels, photo
-  cover-fit with per-panel crop/zoom/pan, grade overlays, sun disc, gutters,
-  neon frame, caption scrim and lettering.
-- `app/src/layouts.js` — the four panel layouts (rects + diagonal clip paths).
-- `app/src/grades.js` — the four colour grades (sky stops, tint, accent).
-- `app/src/caption.js` — caption wrapping, auto-fit and outlined lettering.
-- `app/src/editor.js` — `renderEditor(ctx, state, w, h)`: the whole editor
-  scene (header, live preview, panel outlines and handles, layout thumbnails,
-  grade swatches, export chips) drawn on canvas by the same core.
-- `app/src/main.js` — DOM wiring only: file inputs, buttons, pointer drag /
-  wheel on the preview, export via `canvas.toBlob`.
-- `app/src/shots.js` — fixed `?shot=` scenes for screenshots.
-
-The screenshots in `screenshots/` are the app's own output: `tools/make-shots.mjs`
-runs the same render core in Node (node-canvas) over the kit's free sample
-photos — never a mockup, never a borrowed or composited image.
-
-## Fonts and photos
-
-- Caption font: **Anton** (SIL Open Font License 1.1), bundled as a file at
-  `app/fonts/Anton-Regular.ttf` with its licence at `app/fonts/OFL.txt`.
-  Nothing is hotlinked. No Rockstar logo, wordmark, artwork, character or
-  font is used anywhere; the cover design is original.
-- Sample photos: the two kit samples under `app/samples/`, made with an
-  image model for make.fun and free to use. Your own photos never leave the
-  browser (FileReader, local only).
+Because the core has no DOM dependency, the screenshots are the app's own output: a small Node script (`entries/gta6-cover-art-01-tools/make-shots.mjs`, outside this repo) drives the same core on a software surface, using the kit's free sample photos, and saves the real exported PNGs (also kept beside that script as proof of export). The editor screenshot is the app's own canvas drawing of its editor state — the live preview rendered by the core, plus the control chrome drawn with the same surface. No screenshot was edited, composited from other sources, or borrowed. The only image decoding, glyph rasterization and JPEG encoding the script needs are done by `imgtool.py`, the way a browser provides those same platform services.
 
 ## Run it
 
 ```sh
-node serve.ts          # serves app/ on http://localhost:8080
+node serve.ts
+# open http://localhost:8080
 ```
 
-## Hand in
+No build step, no network request. `main.ts` hands the entry in (copies `app/` + `screenshots/` to `/output` and writes `dossier.json`).
 
-```sh
-MAKEFUN_OUTPUT_DIR=out node main.ts   # writes out/dossier.json
-```
+## Originality
 
-`main.ts` copies `app/` + `screenshots/` to the output directory and writes
-`dossier.json` with the vendored make.fun library (`vendor/makefun-app.ts`,
-unchanged kit copy).
+Cover Heist is an original design. It uses no Rockstar Games logo, wordmark, official artwork, character or font. The title font is Anton (Copyright 2020 The Anton Project Authors, SIL Open Font License, `app/fonts/OFL.txt`). The sample photos under `app/samples/` were made for this bounty with an image model and are free to use; they show no real person photographed without agreement.
 
-## License
+## Verification (19 Nov 2026, in-session)
 
-MIT — see `LICENSE`.
+- `main.ts` run 3×: `dossier.json` byte-identical each time, sha256 `367f858bab464e2305c319b1b4a0b5b011b92a61bec1e2daf2ca3bde777665e5`, 862,185 bytes (cap 1.5 MiB).
+- `node --check` passes on all 9 app sources (1,420 lines) and on the screenshot tooling.
+- Zero network references in `app/`: the only `http` strings anywhere are the two URLs inside the verbatim OFL license text in `app/fonts/OFL.txt`, not loadable references.
+- `app/`: 15 files, 343,409 bytes (caps: 993 files, 48 MiB); `index.html` 5,045 bytes (cap 1 MiB).
+- Screenshots (all within the 256 KiB / 1280px limits): `1-cover.jpg` 1280×720, 139,281 B; `2-editor.jpg` 1280×800, 156,559 B; `3-sizes.jpg` 1280×800, 142,063 B; `4-caption.jpg` 1024×1280, 169,214 B.
+- Real export PNGs produced by the core and verified as valid PNGs: wide 1920×1080, portrait 1080×1350.
+- Served locally with `node serve.ts`: `index.html`, `src/main.js` and the bundled font all return 200.
