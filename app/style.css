@@ -1,0 +1,32 @@
+@font-face {
+  font-family: 'Anton';
+  src: url('./fonts/Anton-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+html, body { margin: 0; min-height: 100%; background: #16121f; color: #f2eefb; font: 15px/1.45 system-ui, sans-serif; }
+.app { display: flex; gap: 32px; align-items: flex-start; justify-content: center; padding: 28px; box-sizing: border-box; }
+.controls { display: flex; flex-direction: column; gap: 10px; width: 320px; flex-shrink: 0; }
+.controls h1 { margin: 0; font-family: 'Anton', sans-serif; font-size: 40px; letter-spacing: 1px; color: #ffd166; }
+.controls h2 { margin: 12px 0 0; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; color: #8f88a3; }
+.tag { margin: 0; color: #cfc9de; }
+.hint { margin: 0; color: #8f88a3; font-size: 13px; }
+label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; }
+input[type=text] { font: inherit; padding: 9px 10px; border: 1px solid #4a4360; border-radius: 6px; background: #241d38; color: #fff; }
+input[type=file] { font: inherit; color: #cfc9de; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; }
+button { font: inherit; font-weight: 700; padding: 9px 12px; border: 1px solid #4a4360; border-radius: 8px; background: #2c2547; color: #fff; cursor: pointer; }
+button:hover { border-color: #ffd166; }
+button.active { background: #ffd166; border-color: #ffd166; color: #16121f; }
+#status { min-height: 1.2em; color: #00ffe7; margin: 4px 0 0; }
+#stage { width: min(720px, 62vw); height: auto; aspect-ratio: 1; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); background: #160a1e; }
+body.shot-cover .controls { display: none; }
+body.shot-cover .app { padding: 0; }
+body.shot-cover #stage { width: 100vw; height: 100vh; box-shadow: none; }
+@media (max-width: 900px) {
+  .app { flex-direction: column; align-items: stretch; }
+  .controls { width: auto; }
+  #stage { width: 100%; }
+}

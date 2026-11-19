@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cover Heist — GTA-style cover maker</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<main class="app">
+  <section class="controls">
+    <h1>Cover Heist</h1>
+    <p class="tag">Your photo + a caption, made into GTA-style cover art. Three steps, offline.</p>
+
+    <h2>1 · Photo</h2>
+    <label>Photo A (hero panel) <input id="photo-a" type="file" accept="image/*"></label>
+    <label>Photo B (other panels) <input id="photo-b" type="file" accept="image/*"></label>
+    <div class="row">
+      <button id="sample-a" type="button">Try sample A</button>
+      <button id="sample-b" type="button">Try sample B</button>
+    </div>
+
+    <h2>2 · Layout</h2>
+    <div class="row" role="group" aria-label="Layout">
+      <button type="button" data-layout="hero-strip">Hero + Strip</button>
+      <button type="button" data-layout="grid">Grid 2×2</button>
+      <button type="button" data-layout="diagonal">Diagonal</button>
+      <button type="button" data-layout="triptych">Triptych</button>
+    </div>
+
+    <h2>3 · Grade</h2>
+    <div class="row" role="group" aria-label="Grade">
+      <button type="button" data-grade="sunset">Sunset</button>
+      <button type="button" data-grade="neon">Neon Nights</button>
+      <button type="button" data-grade="noir">Noir</button>
+      <button type="button" data-grade="gold">Gold Hour</button>
+    </div>
+
+    <h2>4 · Caption</h2>
+    <label>Caption <input id="caption" type="text" maxlength="40" value="Sunset Heist"></label>
+    <div class="row" role="group" aria-label="Caption position">
+      <button type="button" data-position="bottom">Caption at bottom</button>
+      <button type="button" data-position="top">Caption at top</button>
+    </div>
+    <p class="hint">Drag the photo on the preview to reposition it, scroll to zoom, click a panel to select it.</p>
+
+    <h2>5 · Export PNG</h2>
+    <div class="row">
+      <button type="button" data-export="0">1080 × 1080</button>
+      <button type="button" data-export="1">1080 × 1350</button>
+      <button type="button" data-export="2">1920 × 1080</button>
+    </div>
+    <p id="status" role="status"></p>
+  </section>
+  <canvas id="stage" width="720" height="720" aria-label="Cover preview"></canvas>
+</main>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
