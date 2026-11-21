@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Velvet Hour — GTA-Style Cover Art Maker</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header id="topbar">
+  <div class="brand">
+    <span class="brand-title">VELVET HOUR</span>
+    <span class="brand-sub">cover studio</span>
+  </div>
+  <button id="exportBtnTop" class="primary">Export PNG</button>
+</header>
+
+<main id="studio">
+  <aside id="castPane" class="pane">
+    <h2>Cast &amp; photos</h2>
+    <p class="hint">Pick a panel, load your own photo, drag on the preview to position it. Photos never leave this machine.</p>
+    <div id="castList"></div>
+    <label class="file-label" for="photoInput">+ Load photo into panel</label>
+    <input id="photoInput" type="file" accept="image/*">
+    <p class="hint">Selected panel: <strong id="panelName">THE BOSS</strong></p>
+  </aside>
+
+  <section id="previewPane">
+    <canvas id="preview" width="1080" height="1080"></canvas>
+    <p class="hint">Live preview — <span id="layoutName">Cast Mosaic</span> · <span id="gradeName">Sunset Melt</span></p>
+  </section>
+
+  <aside id="controlPane" class="pane">
+    <h2>Layout</h2>
+    <div id="layoutButtons" class="chip-row"></div>
+
+    <h2>Colour grade</h2>
+    <div id="gradeButtons" class="chip-row"></div>
+
+    <h2>Panel crop</h2>
+    <label>Zoom <input id="zoom" type="range" min="100" max="260" value="100"></label>
+    <label>Focus X <input id="focusX" type="range" min="0" max="100" value="50"></label>
+    <label>Focus Y <input id="focusY" type="range" min="0" max="100" value="38"></label>
+
+    <h2>Lettering</h2>
+    <label>Title <input id="titleText" type="text" value="VELVET HOUR" maxlength="24"></label>
+    <label>Subtitle <input id="subtitleText" type="text" value="every tide has a price" maxlength="40"></label>
+    <label>Caption <input id="captionText" type="text" value="ONE CREW. ONE SUMMER. NO WAY BACK." maxlength="48"></label>
+    <label>Caption size <input id="captionSize" type="range" min="20" max="90" value="44"></label>
+    <label>Caption position
+      <select id="captionPos">
+        <option value="bottom" selected>Bottom</option>
+        <option value="center">Centre</option>
+        <option value="top">Top</option>
+      </select>
+    </label>
+    <label class="check"><input id="captionOutline" type="checkbox" checked> Outline</label>
+    <label class="check"><input id="captionShadow" type="checkbox" checked> Shadow</label>
+
+    <h2>Export size</h2>
+    <div id="sizeButtons" class="chip-row"></div>
+    <button id="exportBtn" class="primary wide">Download PNG</button>
+  </aside>
+</main>
+
+<div id="shotMount"></div>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
