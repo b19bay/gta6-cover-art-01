@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Velvet Hour Cover Studio — GTA-style cover art from your photos</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header id="topbar">
+  <div class="brand"><span class="brand-title">VELVET HOUR</span> <span class="brand-sub">COVER STUDIO</span></div>
+  <div class="exports">
+    <span class="exports-label">Export PNG</span>
+    <button id="export-square" type="button">1080 × 1080</button>
+    <button id="export-portrait" type="button">1080 × 1350</button>
+    <button id="export-wide" type="button">1920 × 1080</button>
+  </div>
+</header>
+<main id="studio">
+  <aside id="rail">
+    <section>
+      <h2>Layout</h2>
+      <div id="layout-list" class="option-list"></div>
+    </section>
+    <section>
+      <h2>Grade — one for the whole cast</h2>
+      <div id="grade-list" class="option-list"></div>
+    </section>
+    <section>
+      <h2>Caption (cover title)</h2>
+      <input id="caption-input" type="text" maxlength="24" value="VELVET HOUR">
+      <label class="slider-row">Title size <input id="title-size" type="range" min="70" max="130" value="100"></label>
+    </section>
+    <section>
+      <h2>Subtitle (script line)</h2>
+      <input id="subtitle-input" type="text" maxlength="42" value="every tide has a price">
+    </section>
+    <section>
+      <h2>Tagline ribbon</h2>
+      <input id="tagline-input" type="text" maxlength="48" value="EVERY CREW WANTS A CUT OF THE DUSK">
+    </section>
+    <section>
+      <h2>Selected panel</h2>
+      <p id="selected-info" class="hint">THE BOSS — hero panel</p>
+      <label class="file-button">Load my photo into this panel
+        <input id="photo-input" type="file" accept="image/*" hidden>
+      </label>
+      <label class="slider-row">Zoom <input id="crop-zoom" type="range" min="100" max="220" value="100"></label>
+      <p class="hint">Drag the panel in the preview to reposition its photo. Scroll over it to zoom. Photos are read on this machine only — nothing is uploaded.</p>
+    </section>
+  </aside>
+  <section id="stage">
+    <canvas id="preview" width="1120" height="630"></canvas>
+    <h2 class="tray-title">Cast tray — pick a portrait, then click a panel to place it</h2>
+    <div id="cast-tray"></div>
+  </section>
+</main>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

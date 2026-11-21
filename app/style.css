@@ -1,0 +1,134 @@
+/* Velvet Hour Cover Studio -- dark studio chrome around the canvas. */
+:root {
+  --bg: #120d1f;
+  --panel: #1a1230;
+  --panel-2: #241840;
+  --line: #4a3673;
+  --text: #f3ead8;
+  --muted: #b7a8dd;
+  --gold: #ffd23e;
+  --pink: #e83e8c;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Helvetica Neue", Arial, sans-serif;
+}
+#topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 18px;
+  background: #1d1433;
+  border-bottom: 1px solid var(--line);
+}
+.brand-title {
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: 26px;
+  letter-spacing: 1px;
+  background: linear-gradient(180deg, #ffe259, #ff7847 60%, #e83e8c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.brand-sub { color: var(--muted); font-family: "Arial Narrow", sans-serif; letter-spacing: 3px; margin-left: 8px; }
+.exports { display: flex; gap: 8px; align-items: center; }
+.exports-label { color: var(--muted); font-size: 13px; }
+.exports button {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-family: "Arial Narrow", sans-serif;
+  font-size: 14px;
+}
+.exports button:hover { border-color: var(--gold); }
+#studio { display: flex; gap: 16px; padding: 16px; align-items: flex-start; }
+#rail {
+  width: 264px;
+  flex: 0 0 264px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+}
+#rail h2, .tray-title {
+  font-family: "Arial Narrow", sans-serif;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin: 14px 0 8px;
+}
+#rail section:first-child h2 { margin-top: 0; }
+.option-list { display: grid; gap: 6px; }
+.option-list button {
+  text-align: left;
+  background: var(--panel-2);
+  color: var(--muted);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 7px 10px;
+  cursor: pointer;
+  font-size: 13.5px;
+}
+.option-list button.selected { color: #fff; border-color: var(--gold); background: #3d2566; }
+#rail input[type="text"] {
+  width: 100%;
+  background: #0e0a1c;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: #fff;
+  padding: 8px 10px;
+  font-size: 15px;
+}
+.slider-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; margin-top: 8px; }
+.file-button {
+  display: block;
+  margin-top: 8px;
+  background: var(--pink);
+  color: #fff;
+  text-align: center;
+  border-radius: 8px;
+  padding: 9px 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.hint { color: #8f7fb8; font-size: 12.5px; line-height: 1.45; }
+#stage { flex: 1; min-width: 0; }
+#preview {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: #0e0a1c;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: grab;
+}
+#cast-tray { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
+.tray-item { cursor: pointer; text-align: center; }
+.tray-item img {
+  width: 100%;
+  height: 92px;
+  object-fit: cover;
+  object-position: 50% 30%;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  display: block;
+}
+.tray-item.selected img { border-color: var(--gold); }
+.tray-item span {
+  font-family: "Arial Narrow", sans-serif;
+  font-size: 11.5px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+}
+.tray-item.selected span { color: var(--gold); }
+body.shot { background: #000; }
+body.shot #topbar, body.shot #rail, body.shot .tray-title, body.shot #cast-tray { display: none; }
+body.shot #studio { padding: 0; }
+body.shot #preview { border: none; border-radius: 0; }
